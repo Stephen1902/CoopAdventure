@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/GameInstanceSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
-#include "OnlineSubsystem.h"
 #include "MultiplayerInstanceSubsystem.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttemptServerJoin, bool, Successful);
 
 /**
  * 
@@ -31,13 +31,22 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer Subsystem")
 	void JoinServer(const FString ServerName);
 
-private:
-	IOnlineSubsystem* OnlineSubsystem;
-	FString SubsystemName;
+	UPROPERTY(BlueprintAssignable)
+	FOnAttemptServerJoin OnAttemptServerJoin;
 
-	void OnCreateSessionComplete(FName SessionName, bool bSuccessful);
-	void OnDestroySessionComplete(FName SessionName, bool bSuccessful);
+private:
+	class IOnlineSubsystem* OnlineSubsystem;
+	FString SubsystemName;
+	FName MySessionName;
+
+	void OnCreateSessionComplete(FName SessionName, bool WasSuccessful);
+	void OnDestroySessionComplete(FName SessionName, bool WasSuccessful);
+	void OnFindSessionsComplete(bool WasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type JoinResult);
 
 	bool bCreateServerAfterDestroy;
 	FString DestroyServerName;
+	FString ServerNameToFind;
+
+	TSharedPtr<FOnlineSessionSearch> SessionSearch; 
 };

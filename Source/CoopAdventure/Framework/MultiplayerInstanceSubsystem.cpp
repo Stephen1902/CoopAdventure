@@ -1,7 +1,10 @@
 // Copyright 2024 DME Games
 
 #include "MultiplayerInstanceSubsystem.h"
+#include "OnlineSubsystem.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "Online/OnlineSessionNames.h"
 
 void PrintString(const FString& StringIn)
 {
@@ -18,6 +21,8 @@ UMultiplayerInstanceSubsystem::UMultiplayerInstanceSubsystem()
 	OnlineSubsystem = nullptr;
 	bCreateServerAfterDestroy = false;
 	DestroyServerName = "";
+	ServerNameToFind = "";
+	MySessionName = FName("Co-op Adventure Session Name");
 }
 
 void UMultiplayerInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -34,6 +39,8 @@ void UMultiplayerInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collect
 		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UMultiplayerInstanceSubsystem::OnCreateSessionComplete);
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UMultiplayerInstanceSubsystem::OnDestroySessionComplete);
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UMultiplayerInstanceSubsystem::OnFindSessionsComplete);
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UMultiplayerInstanceSubsystem::OnJoinSessionComplete);
 		}
 	}
 }
@@ -52,9 +59,7 @@ void UMultiplayerInstanceSubsystem::CreateServer(const FString ServerName)
 		PrintString(TEXT("Server name cannot be empty"));
 		return;
 	}
-
-	FName MySessionName = FName("Co-op Adventure Session Name");
-
+	
 	// Check if a session already exists, destroy it if it does
 	if (const FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(MySessionName))
 	{
@@ -80,29 +85,112 @@ void UMultiplayerInstanceSubsystem::CreateServer(const FString ServerName)
 	{
 		SessionSettings.bIsLANMatch = false;
 	}
-
+	SessionSettings.Set(FName("DME_SERVER01"), ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	
 	SessionInterface->CreateSession(0, MySessionName, SessionSettings);
 		
 }
 
 void UMultiplayerInstanceSubsystem::JoinServer(const FString ServerName)
 {
-	PrintString(ServerName);
+	if (ServerName.IsEmpty())
+	{
+		PrintString("ServerName cannot be empty");
+		return;
+	}
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	if (SubsystemName == "NULL")
+	{
+		SessionSearch->bIsLanQuery = true;
+	}
+	else
+	{
+		SessionSearch->bIsLanQuery = false;
+	}
+	SessionSearch->MaxSearchResults = 128;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+	ServerNameToFind = ServerName;
+	
+	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 }
 
-void UMultiplayerInstanceSubsystem::OnCreateSessionComplete(FName SessionName, bool bSuccessful)
+void UMultiplayerInstanceSubsystem::OnCreateSessionComplete(FName SessionName, bool WasSuccessful)
 {
-	if (bSuccessful)
+	if (WasSuccessful)
 	{
 		GetWorld()->ServerTravel("/Game/ThirdPerson/Maps/ThirdPersonMap?listen");
 	}
 }
 
-void UMultiplayerInstanceSubsystem::OnDestroySessionComplete(FName SessionName, bool bSuccessful)
+void UMultiplayerInstanceSubsystem::OnDestroySessionComplete(FName SessionName, bool WasSuccessful)
 {
-	if (bSuccessful && bCreateServerAfterDestroy)
+	if (WasSuccessful && bCreateServerAfterDestroy)
 	{
 		bCreateServerAfterDestroy = false;
 		CreateServer(DestroyServerName);
+	}
+}
+
+void UMultiplayerInstanceSubsystem::OnFindSessionsComplete(bool WasSuccessful)
+{
+	if (WasSuccessful && !ServerNameToFind.IsEmpty())
+	{
+		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
+		FOnlineSessionSearchResult* CorrectResult = nullptr;
+		if (SearchResults.Num() > 0)
+		{
+			for (FOnlineSessionSearchResult SearchResult : SearchResults)
+			{
+				if (SearchResult.IsValid())
+				{
+					FString FoundServerName = "DME_NOSERVER";
+					SearchResult.Session.SessionSettings.Get(FName("DME_SERVER01"), FoundServerName);
+					if (ServerNameToFind == FoundServerName)
+					{
+						CorrectResult = &SearchResult;
+						const FString Msg = FString::Printf(TEXT("Server found with name %s"), *FoundServerName);
+						PrintString(Msg);
+						break;
+					}
+				}
+			}
+
+			if (CorrectResult)
+            {
+				SessionInterface->JoinSession(0, MySessionName, *CorrectResult);
+            }
+            else
+            {
+            	OnAttemptServerJoin.Broadcast(false);
+            	PrintString("Couldn't find server");
+            }
+		}
+		else
+		{
+			OnAttemptServerJoin.Broadcast(false);
+			PrintString("No servers found");
+		}
+	}
+}
+
+void UMultiplayerInstanceSubsystem::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type JoinResult)
+{
+	if (JoinResult == EOnJoinSessionCompleteResult::Success)
+	{
+		FString ServerIP = "";
+		if (SessionInterface->GetResolvedConnectString(SessionName, ServerIP))
+		{
+			if (APlayerController* PC = GetGameInstance()->GetFirstLocalPlayerController())
+			{
+				PC->ClientTravel(ServerIP, TRAVEL_Absolute);
+			}
+		}
+	}
+	else
+	{
+		OnAttemptServerJoin.Broadcast(false);
+		PrintString("On Join Session Complete called but failed");
 	}
 }
