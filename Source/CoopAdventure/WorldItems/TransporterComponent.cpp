@@ -17,6 +17,7 @@ UTransporterComponent::UTransporterComponent()
 	StartPoint = FVector::Zero();
 	EndPoint = FVector::Zero();
 	bArePointsSet = false;
+	bCanMove = true;
 	MoveTime = 3.0f;
 	ActivatedTriggerCount = 0;
 	bHasBeenTriggered = false;
@@ -58,14 +59,21 @@ void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (MyOwner && MyOwner->HasAuthority() && bArePointsSet)
+	if (bCanMove)
 	{
-		FVector CurrentLocation = MyOwner->GetActorLocation();
-		FVector TargetLocation = bHasBeenTriggered ? EndPoint : StartPoint;
-		if (!CurrentLocation.Equals(TargetLocation) || (CurrentLocation.Equals(EndPoint) && ReturnsToStartPoint))
+		if (MyOwner && MyOwner->HasAuthority() && bArePointsSet)
 		{
-			const FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation, TargetLocation, DeltaTime, SpeedPerFrame);
-			MyOwner->SetActorLocation(NewLocation);
+			FVector CurrentLocation = MyOwner->GetActorLocation();
+			FVector TargetLocation = bHasBeenTriggered ? EndPoint : StartPoint;
+			if (!CurrentLocation.Equals(TargetLocation))
+			{
+				const FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation, TargetLocation, DeltaTime, SpeedPerFrame);
+				MyOwner->SetActorLocation(NewLocation);
+				if (NewLocation == EndPoint && !ReturnsToStartPoint)
+				{
+					bCanMove = false;
+				}
+			}
 		}
 	}
 }

@@ -60,4 +60,5 @@ private:
 	AActor* MyOwner;
 
 	float SpeedPerFrame;
+	bool bCanMove;
 };

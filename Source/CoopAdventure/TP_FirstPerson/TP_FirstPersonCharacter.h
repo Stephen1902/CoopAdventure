@@ -63,6 +63,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
 	float TimeBetweenInteractions;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
+	TSubclassOf<class UPlayerWidget> WidgetToDisplay;
+	
 public:
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
@@ -73,5 +76,12 @@ private:
 	float TimeSinceLastInteract;
 
 	void TryToInteract();
+	UPROPERTY()
+	AActor* ActorBeingViewed;
+//	UPROPERTY()
+//	class UInteractionComponent* ComponentInView;
+	
+	UPROPERTY()
+	UPlayerWidget* PlayerWidgetRef;
 };
 

@@ -1,13 +1,14 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "TP_FirstPersonCharacter.h"
-#include "TP_FirstPersonProjectile.h"
-#include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "PlayerWidget.h"
+#include "CoopAdventure/Components/InteractionComponent.h"
 
+#define TRACE_INTERACTIVE ECC_GameTraceChannel1
 
 //////////////////////////////////////////////////////////////////////////
 // ATP_FirstPersonCharacter
@@ -48,6 +49,12 @@ void ATP_FirstPersonCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+
+		if (WidgetToDisplay)
+		{
+			PlayerWidgetRef = CreateWidget<UPlayerWidget>(PlayerController, WidgetToDisplay);
+			PlayerWidgetRef->AddToViewport();
+		}
 	}
 
 }
@@ -85,6 +92,40 @@ void ATP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 
 void ATP_FirstPersonCharacter::TryToInteract()
 {
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	FVector StartLoc;
+	FRotator StartRot;
+	GetActorEyesViewPoint(StartLoc, StartRot);
+	const FVector EndLoc = (StartRot.Vector() * 300.f) + StartLoc;
+
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLoc, EndLoc, TRACE_INTERACTIVE, QueryParams);
+
+	if (HitResult.IsValidBlockingHit())
+	{
+		if (ActorBeingViewed != HitResult.GetActor() && PlayerWidgetRef)
+		{
+			ActorBeingViewed = HitResult.GetActor();
+			
+			if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(HitResult.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
+			{
+				PlayerWidgetRef->SetMessageText(InteractionComponent->GetTextToDisplay());
+			}
+		}
+	}
+	else
+	{
+		if (ActorBeingViewed != nullptr)
+		{
+			if (PlayerWidgetRef)
+			{
+				PlayerWidgetRef->SetMessageText(FText::FromString(""));
+			}
+			ActorBeingViewed = nullptr;
+		}
+	}
 }
 
 
