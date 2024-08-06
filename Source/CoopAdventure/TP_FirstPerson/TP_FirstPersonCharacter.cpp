@@ -105,13 +105,16 @@ void ATP_FirstPersonCharacter::TryToInteract()
 
 	if (HitResult.IsValidBlockingHit())
 	{
-		if (ActorBeingViewed != HitResult.GetActor() && PlayerWidgetRef)
+		if (ActorBeingViewed != HitResult.GetActor())
 		{
 			ActorBeingViewed = HitResult.GetActor();
 			
 			if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(HitResult.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
 			{
-				PlayerWidgetRef->SetMessageText(InteractionComponent->GetTextToDisplay());
+				if (!InteractionComponent->GetTextToDisplay().IsEmpty() && PlayerWidgetRef)
+				{
+					PlayerWidgetRef->SetMessageText(InteractionComponent->GetTextToDisplay());
+				}
 			}
 		}
 	}
