@@ -30,6 +30,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Components")
 	TObjectPtr<UArrowComponent> EndPoint;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UArrowComponent> StartRot;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UArrowComponent> EndRot;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class UTransporterComponent* TransporterComp; 

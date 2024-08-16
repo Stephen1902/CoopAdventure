@@ -4,6 +4,7 @@
 #include "TransporterComponent.h"
 
 #include "PressurePlateActor.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UTransporterComponent::UTransporterComponent()
@@ -16,6 +17,8 @@ UTransporterComponent::UTransporterComponent()
 	
 	StartPoint = FVector::Zero();
 	EndPoint = FVector::Zero();
+	StartRotation = FRotator::ZeroRotator;
+	EndRotation = FRotator::ZeroRotator;
 	bArePointsSet = false;
 	bCanMove = true;
 	MoveTime = 3.0f;
@@ -43,12 +46,12 @@ void UTransporterComponent::BeginPlay()
 	MyOwner = GetOwner();
 }
 
-void UTransporterComponent::SetTravelPoints(const FVector Point1, const FVector Point2)
+void UTransporterComponent::SetTravelPoints(const FVector LocPoint1, const FVector LocPoint2)
 {
-	if (!Point1.Equals(Point2))
+	if (!LocPoint1.Equals(LocPoint2))
 	{
-		StartPoint = Point1;
-		EndPoint = Point2;
+		StartPoint = LocPoint1;
+		EndPoint = LocPoint2;
 		SpeedPerFrame = FVector::Distance(StartPoint, EndPoint) / MoveTime;
 		bArePointsSet = true;
 	}
@@ -95,4 +98,3 @@ void UTransporterComponent::OnPressurePlateDeactivated()
 		bHasBeenTriggered = false;
 	}
 }
-

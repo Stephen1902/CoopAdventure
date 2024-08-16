@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "CoopAdventure/Framework/InteractionInterface.h"
 #include "TP_FirstPersonCharacter.generated.h"
 
 class UInputComponent;
@@ -15,7 +16,7 @@ class UAnimMontage;
 class USoundBase;
 
 UCLASS(config=Game)
-class ATP_FirstPersonCharacter : public ACharacter
+class ATP_FirstPersonCharacter : public ACharacter, public IInteractionInterface
 {
 	GENERATED_BODY()
 
@@ -42,7 +43,9 @@ class ATP_FirstPersonCharacter : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
 public:
 	ATP_FirstPersonCharacter();
 
@@ -74,14 +77,23 @@ public:
 
 private:
 	float TimeSinceLastInteract;
-
+	
 	void TryToInteract();
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AActor* ActorBeingViewed;
 //	UPROPERTY()
 //	class UInteractionComponent* ComponentInView;
 	
 	UPROPERTY()
 	UPlayerWidget* PlayerWidgetRef;
+	
+	UFUNCTION()
+	void Interact();
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteract();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetActorBeingViewed(ATP_FirstPersonCharacter* ActorToSetTo, AActor* NewActorBeingViewed);
 };
 

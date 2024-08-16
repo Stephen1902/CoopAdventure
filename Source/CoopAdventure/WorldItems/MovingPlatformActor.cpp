@@ -11,7 +11,7 @@ AMovingPlatformActor::AMovingPlatformActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
-	SetReplicateMovement(true);
+	SetReplicatingMovement(true);
 
 	RootComp = CreateDefaultSubobject<USceneComponent>("Root Comp");
 	SetRootComponent(RootComp);

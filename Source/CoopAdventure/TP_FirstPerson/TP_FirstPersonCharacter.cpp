@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "PlayerWidget.h"
 #include "CoopAdventure/Components/InteractionComponent.h"
+#include "Net/UnrealNetwork.h"
 
 #define TRACE_INTERACTIVE ECC_GameTraceChannel1
 
@@ -35,6 +36,8 @@ ATP_FirstPersonCharacter::ATP_FirstPersonCharacter()
 
 	TimeBetweenInteractions = 0.1f;
 	TimeSinceLastInteract = 0.f;
+
+	bAlwaysRelevant = true;
 }
 
 void ATP_FirstPersonCharacter::BeginPlay()
@@ -87,6 +90,9 @@ void ATP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATP_FirstPersonCharacter::Look);
+
+		// Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ATP_FirstPersonCharacter::Interact);
 	}
 }
 
@@ -105,17 +111,23 @@ void ATP_FirstPersonCharacter::TryToInteract()
 
 	if (HitResult.IsValidBlockingHit())
 	{
-		if (ActorBeingViewed != HitResult.GetActor())
+		if (ActorBeingViewed != HitResult.GetActor() && PlayerWidgetRef)
 		{
 			ActorBeingViewed = HitResult.GetActor();
-			
-			if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(HitResult.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
+
+			if (!HasAuthority())
 			{
-				if (!InteractionComponent->GetTextToDisplay().IsEmpty() && PlayerWidgetRef)
-				{
-					PlayerWidgetRef->SetMessageText(InteractionComponent->GetTextToDisplay());
-				}
+				Server_SetActorBeingViewed(this, ActorBeingViewed);
 			}
+			
+			const FText TextToShow = Execute_LookAt(ActorBeingViewed);
+			if (!TextToShow.EqualTo(FText::FromString("")))
+			{
+				PlayerWidgetRef->SetMessageText(TextToShow);
+			}
+			//if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(HitResult.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
+			//{
+			//	if (!InteractionComponent->GetTextToDisplay().IsEmpty() && PlayerWidgetRef)
 		}
 	}
 	else
@@ -126,11 +138,47 @@ void ATP_FirstPersonCharacter::TryToInteract()
 			{
 				PlayerWidgetRef->SetMessageText(FText::FromString(""));
 			}
+
 			ActorBeingViewed = nullptr;
+			if (!HasAuthority())
+			{
+				Server_SetActorBeingViewed(this, nullptr);
+			}
 		}
 	}
 }
 
+void ATP_FirstPersonCharacter::Interact()
+{
+	if (!HasAuthority())
+	{
+		ServerInteract();
+		return;
+	}
+
+	if (ActorBeingViewed != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Interact called in code, Actor is %s."), *ActorBeingViewed->GetName());
+		Execute_InteractWith(ActorBeingViewed, this);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Interact called without a valid ActorBeingViewed"));
+	}
+}
+
+void ATP_FirstPersonCharacter::Server_SetActorBeingViewed_Implementation(ATP_FirstPersonCharacter* ActorToSetTo, AActor* NewActorBeingViewed)
+{
+	if (ActorToSetTo)
+	{
+		ActorToSetTo->ActorBeingViewed = NewActorBeingViewed;
+	}
+}
+
+void ATP_FirstPersonCharacter::ServerInteract_Implementation()
+{
+	Interact();
+}
 
 void ATP_FirstPersonCharacter::Move(const FInputActionValue& Value)
 {
@@ -156,4 +204,11 @@ void ATP_FirstPersonCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ATP_FirstPersonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATP_FirstPersonCharacter, ActorBeingViewed);
 }
