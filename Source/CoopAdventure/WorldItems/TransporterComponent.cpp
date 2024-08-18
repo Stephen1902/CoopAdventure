@@ -57,6 +57,11 @@ void UTransporterComponent::SetTravelPoints(const FVector LocPoint1, const FVect
 	}
 }
 
+void UTransporterComponent::SetCanMove(const bool CanMove)
+{
+	bCanMove = CanMove;
+}
+
 // Called every frame
 void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

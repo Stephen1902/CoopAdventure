@@ -18,6 +18,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTravelPoints(const FVector LocPoint1, const FVector LocPoint2);
 
+	void SetCanMove(const bool CanMove);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

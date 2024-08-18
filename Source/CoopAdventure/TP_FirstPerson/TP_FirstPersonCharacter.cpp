@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "PlayerWidget.h"
 #include "CoopAdventure/Components/InteractionComponent.h"
+#include "CoopAdventure/WorldItems/InteractiveActor.h"
 #include "Net/UnrealNetwork.h"
 
 #define TRACE_INTERACTIVE ECC_GameTraceChannel1
@@ -158,7 +159,6 @@ void ATP_FirstPersonCharacter::Interact()
 
 	if (ActorBeingViewed != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Interact called in code, Actor is %s."), *ActorBeingViewed->GetName());
 		Execute_InteractWith(ActorBeingViewed, this);
 	}
 	else

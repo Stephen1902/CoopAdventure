@@ -5,6 +5,7 @@
 
 #include "TransporterComponent.h"
 #include "CoopAdventure/Components/InteractionComponent.h"
+#include "CoopAdventure/Components/RotationComponent.h"
 #include "CoopAdventure/TP_FirstPerson/TP_FirstPersonCharacter.h"
 
 #define TRACE_INTERACTIVE ECC_GameTraceChannel1
@@ -28,6 +29,7 @@ AInteractiveActor::AInteractiveActor()
 
 	InteractionComp = CreateDefaultSubobject<UInteractionComponent>("Interaction Comp");
 	TransporterComp = CreateDefaultSubobject<UTransporterComponent>("Transporter Comp");
+	RotationComp = CreateDefaultSubobject<URotationComponent>("Rotation Comp");
 }
 
 // Called when the game starts or when spawned
@@ -63,8 +65,10 @@ FText AInteractiveActor::LookAt_Implementation()
 
 void AInteractiveActor::InteractWith_Implementation(ATP_FirstPersonCharacter* CharacterWhoInteracted)
 {
+	TransporterComp->SetCanMove(true);
+	RotationComp->SetCanMove(true);
+
+	OnActivatedChange.Broadcast(true);
+	
 	IInteractionInterface::InteractWith_Implementation(CharacterWhoInteracted);
-
-	UE_LOG(LogTemp, Warning, TEXT("C++ InteractWith_Implementation called."));
 }
-
