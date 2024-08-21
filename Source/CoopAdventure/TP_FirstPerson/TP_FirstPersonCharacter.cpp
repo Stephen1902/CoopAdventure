@@ -107,7 +107,7 @@ void ATP_FirstPersonCharacter::TryToInteract()
 	FRotator StartRot;
 	GetActorEyesViewPoint(StartLoc, StartRot);
 	const FVector EndLoc = (StartRot.Vector() * 300.f) + StartLoc;
-
+	
 	GetWorld()->LineTraceSingleByChannel(HitResult, StartLoc, EndLoc, TRACE_INTERACTIVE, QueryParams);
 
 	if (HitResult.IsValidBlockingHit())

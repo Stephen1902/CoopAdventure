@@ -16,8 +16,9 @@ public:
 	UTransporterComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void SetTravelPoints(const FVector LocPoint1, const FVector LocPoint2);
+	void SetTravelPoint(const FVector LocationChange);
 
+	UFUNCTION(BlueprintCallable)
 	void SetCanMove(const bool CanMove);
 protected:
 	// Called when the game starts
@@ -34,6 +35,10 @@ protected:
 	// Whether or not the owning actor returns to StartPoint when deactivated
 	UPROPERTY(EditAnywhere)
 	bool ReturnsToStartPoint;
+
+	// Relative point to move to when activated
+	UPROPERTY(EditAnywhere)
+	FVector PointToMoveTo;
 	
 	// Number of TriggerActors that have been triggered
 	UPROPERTY(VisibleAnywhere)
@@ -49,10 +54,7 @@ public:
 private:
 	FVector StartPoint;
 	FVector EndPoint;
-
-	FRotator StartRotation;
-	FRotator EndRotation;
-
+	
 	bool bArePointsSet;
 
 	UFUNCTION()
@@ -62,6 +64,9 @@ private:
 
 	UPROPERTY()
 	AActor* MyOwner;
+
+	UPROPERTY()
+	class AInteractiveActor* InteractiveOwner;
 
 	float SpeedPerFrame;
 	bool bCanMove;

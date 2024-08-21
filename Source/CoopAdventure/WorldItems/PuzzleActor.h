@@ -4,20 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TriggeredActor.generated.h"
-
-/** A base class for any actor that is only activated by another actor triggering it ie, a door that needs a code entered into it by an interactive actor */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStateChanged, bool, NewState);
-
+#include "PuzzleActor.generated.h"
 
 UCLASS()
-class COOPADVENTURE_API ATriggeredActor : public AActor
+class COOPADVENTURE_API APuzzleActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATriggeredActor();
+	APuzzleActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,7 +27,7 @@ protected:
 
 	// A list of actors that are needed to all be true to activate this actor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
-	TArray<TObjectPtr<class AInteractiveActor>> ActorsToActivate;
+	TArray<TObjectPtr<class ATriggeredActor>> ActorsToActivate;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UTransporterComponent> TransporterComp;
@@ -40,20 +36,14 @@ protected:
 	TObjectPtr<class URotationComponent> RotationComp;
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Triggered|Triggered Events")
-	void BPDealWithActivatedChanged(const bool BoolOut);
-
-	UFUNCTION(BlueprintCallable, Category = "Triggered|Triggered Events")
-	void StateHasChanged(const bool NewState);
-
+	void BPDealWithActivatedComplete();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	UPROPERTY(BlueprintAssignable)
-	FOnStateChanged OnStateChanged;
+
 private:
-	int32 NumberActivated;
+	int32 CurrentlyActivated;
 
 	UFUNCTION()
-	void DealWithActivatedChanged(const bool BoolIn);
+	void TriggeredActorChanged(const bool NewState);
 };

@@ -20,6 +20,9 @@ public:
 
 	UPROPERTY()
 	FOnActivatedChange OnActivatedChange;
+
+	UFUNCTION(BlueprintCallable, Category = "Interactive|Interactive")
+	void SetCanBeInteractedWith(const bool InteractionState);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -30,14 +33,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
 	UStaticMeshComponent* MeshComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class UInteractionComponent* InteractionComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class UTransporterComponent* TransporterComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class URotationComponent* RotationComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	class UWidgetComponent* WidgetComp;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -45,4 +52,8 @@ public:
 	virtual FText LookAt_Implementation() override;
 	UFUNCTION()
 	virtual void InteractWith_Implementation(ATP_FirstPersonCharacter* CharacterWhoInteracted) override;
+
+	
+private:
+	bool bCanBeInteractedWith;
 };

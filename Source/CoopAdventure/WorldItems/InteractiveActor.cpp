@@ -4,6 +4,7 @@
 #include "InteractiveActor.h"
 
 #include "TransporterComponent.h"
+#include "Components/WidgetComponent.h"
 #include "CoopAdventure/Components/InteractionComponent.h"
 #include "CoopAdventure/Components/RotationComponent.h"
 #include "CoopAdventure/TP_FirstPerson/TP_FirstPersonCharacter.h"
@@ -30,6 +31,10 @@ AInteractiveActor::AInteractiveActor()
 	InteractionComp = CreateDefaultSubobject<UInteractionComponent>("Interaction Comp");
 	TransporterComp = CreateDefaultSubobject<UTransporterComponent>("Transporter Comp");
 	RotationComp = CreateDefaultSubobject<URotationComponent>("Rotation Comp");
+	WidgetComp = CreateDefaultSubobject<UWidgetComponent>("Widget Comp");
+	WidgetComp->SetVisibility(false);
+
+	bCanBeInteractedWith = true;
 }
 
 // Called when the game starts or when spawned
@@ -52,12 +57,22 @@ void AInteractiveActor::Tick(float DeltaTime)
 
 FText AInteractiveActor::LookAt_Implementation()
 {
-	if (InteractionComp)
+	if (bCanBeInteractedWith)
 	{
-		if (!InteractionComp->GetTextToDisplay().IsEmpty())
+		if (InteractionComp)
 		{
-			return InteractionComp->GetTextToDisplay();
+			if (!InteractionComp->GetTextToDisplay().IsEmpty())
+			{
+				return InteractionComp->GetTextToDisplay();
+			}
 		}
+		
+
+	/*	if (WidgetComp)
+		{
+			WidgetComp->SetVisibility(true);
+		}
+		*/
 	}
 	
 	return FText::FromString("");
@@ -65,10 +80,23 @@ FText AInteractiveActor::LookAt_Implementation()
 
 void AInteractiveActor::InteractWith_Implementation(ATP_FirstPersonCharacter* CharacterWhoInteracted)
 {
-	TransporterComp->SetCanMove(true);
-	RotationComp->SetCanMove(true);
+	if (bCanBeInteractedWith)
+	{
+		TransporterComp->SetCanMove(true);
+		RotationComp->SetCanMove(true);
 
-	OnActivatedChange.Broadcast(true);
+		OnActivatedChange.Broadcast(true);
 	
-	IInteractionInterface::InteractWith_Implementation(CharacterWhoInteracted);
+		IInteractionInterface::InteractWith_Implementation(CharacterWhoInteracted);
+	}
+}
+
+void AInteractiveActor::SetCanBeInteractedWith(const bool InteractionState)
+{
+	bCanBeInteractedWith = InteractionState;
+
+	if (!bCanBeInteractedWith)
+	{
+		InteractionComp->DestroyComponent();
+	}
 }

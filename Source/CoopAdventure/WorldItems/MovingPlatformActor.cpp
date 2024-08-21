@@ -33,11 +33,6 @@ AMovingPlatformActor::AMovingPlatformActor()
 void AMovingPlatformActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (TransporterComp)
-	{
-		TransporterComp->SetTravelPoints(GetActorLocation() + StartPoint->GetRelativeLocation(), GetActorLocation() + EndPoint->GetRelativeLocation());
-	}
 }
 
 // Called every frame

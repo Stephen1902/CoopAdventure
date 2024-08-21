@@ -2,9 +2,8 @@
 
 
 #include "TransporterComponent.h"
-
+#include "InteractiveActor.h"
 #include "PressurePlateActor.h"
-#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UTransporterComponent::UTransporterComponent()
@@ -17,10 +16,9 @@ UTransporterComponent::UTransporterComponent()
 	
 	StartPoint = FVector::Zero();
 	EndPoint = FVector::Zero();
-	StartRotation = FRotator::ZeroRotator;
-	EndRotation = FRotator::ZeroRotator;
+	PointToMoveTo = FVector::Zero();
 	bArePointsSet = false;
-	bCanMove = true;
+	bCanMove = false;
 	MoveTime = 3.0f;
 	ActivatedTriggerCount = 0;
 	bHasBeenTriggered = false;
@@ -28,12 +26,18 @@ UTransporterComponent::UTransporterComponent()
 	SpeedPerFrame = 0.f;
 }
 
+void UTransporterComponent::SetTravelPoint(const FVector LocationChange)
+{
+
+}
 
 // Called when the game starts
 void UTransporterComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	MyOwner = GetOwner();
+	
 	for (AActor* TriggerActor : TriggerActors)
 	{
 		if (APressurePlateActor* PressurePlateActor = Cast<APressurePlateActor>(TriggerActor))
@@ -43,23 +47,31 @@ void UTransporterComponent::BeginPlay()
 		}
 	}
 
-	MyOwner = GetOwner();
-}
-
-void UTransporterComponent::SetTravelPoints(const FVector LocPoint1, const FVector LocPoint2)
-{
-	if (!LocPoint1.Equals(LocPoint2))
+	if (!ReturnsToStartPoint)
 	{
-		StartPoint = LocPoint1;
-		EndPoint = LocPoint2;
-		SpeedPerFrame = FVector::Distance(StartPoint, EndPoint) / MoveTime;
-		bArePointsSet = true;
+		InteractiveOwner = Cast<AInteractiveActor>(MyOwner);
 	}
+	
+	if (MyOwner)
+	{
+		if (PointToMoveTo != FVector::Zero())
+		{
+			StartPoint = MyOwner->GetActorLocation();
+			EndPoint = MyOwner->GetActorLocation() + PointToMoveTo;
+			SpeedPerFrame = FVector::Distance(StartPoint, EndPoint) / MoveTime;
+			bArePointsSet = true;
+		}
+	}
+	
 }
 
 void UTransporterComponent::SetCanMove(const bool CanMove)
 {
 	bCanMove = CanMove;
+	if (bCanMove)
+	{
+		bHasBeenTriggered = true;
+	}
 }
 
 // Called every frame
@@ -77,9 +89,20 @@ void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 			{
 				const FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation, TargetLocation, DeltaTime, SpeedPerFrame);
 				MyOwner->SetActorLocation(NewLocation);
-				if (NewLocation == EndPoint && !ReturnsToStartPoint)
+				if (NewLocation == EndPoint)
 				{
-					bCanMove = false;
+					if (!ReturnsToStartPoint)
+					{
+						bCanMove = false;
+						if (InteractiveOwner)
+						{
+							InteractiveOwner->SetCanBeInteractedWith(false);
+						}
+					}
+					else
+					{
+						bHasBeenTriggered = false;
+					}
 				}
 			}
 		}
