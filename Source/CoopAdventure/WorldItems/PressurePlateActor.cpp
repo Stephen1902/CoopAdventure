@@ -32,8 +32,11 @@ void APressurePlateActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &APressurePlateActor::OnBeginOverlap);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &APressurePlateActor::OnEndOverlap);
+	if (CollisionComp)
+	{
+		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &APressurePlateActor::OnBeginOverlap);
+		CollisionComp->OnComponentEndOverlap.AddDynamic(this, &APressurePlateActor::OnEndOverlap);
+	}
 }
 
 // Called every frame

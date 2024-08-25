@@ -74,6 +74,11 @@ void UTransporterComponent::SetCanMove(const bool CanMove)
 	}
 }
 
+void UTransporterComponent::SetIsTriggered(const bool CanMove)
+{
+	bHasBeenTriggered = CanMove;
+}
+
 // Called every frame
 void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -89,7 +94,7 @@ void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 			{
 				const FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation, TargetLocation, DeltaTime, SpeedPerFrame);
 				MyOwner->SetActorLocation(NewLocation);
-				if (NewLocation == EndPoint)
+				if (NewLocation == EndPoint && ActivatedTriggerCount == 0)
 				{
 					if (!ReturnsToStartPoint)
 					{
@@ -109,20 +114,20 @@ void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 }
 
-void UTransporterComponent::OnPressurePlateActivated()
+void UTransporterComponent::ChangeInOverlappingActors(const int32 NumNeededToActivate, const bool IsIncreasing)
 {
-	ActivatedTriggerCount++;
-	if (ActivatedTriggerCount >= TriggerActors.Num() && !bHasBeenTriggered)
+	if (IsIncreasing)
 	{
-		bHasBeenTriggered = true;
+		ActivatedTriggerCount++;
+		if (ActivatedTriggerCount >= NumNeededToActivate)
+		{
+			bCanMove = true;
+			bHasBeenTriggered = true;
+		}
 	}
-}
-
-void UTransporterComponent::OnPressurePlateDeactivated()
-{
-	ActivatedTriggerCount--;
-	if (ActivatedTriggerCount < TriggerActors.Num() && bHasBeenTriggered)
+	else
 	{
+		ActivatedTriggerCount--;
 		bHasBeenTriggered = false;
 	}
 }

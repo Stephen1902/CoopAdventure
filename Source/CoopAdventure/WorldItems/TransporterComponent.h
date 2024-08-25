@@ -20,6 +20,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCanMove(const bool CanMove);
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsTriggered(const bool CanMove);
+
+	void ChangeInOverlappingActors(const int32 NumNeededToActivate, bool IsIncreasing);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -56,11 +62,6 @@ private:
 	FVector EndPoint;
 	
 	bool bArePointsSet;
-
-	UFUNCTION()
-	void OnPressurePlateActivated();
-	UFUNCTION()
-	void OnPressurePlateDeactivated();
 
 	UPROPERTY()
 	AActor* MyOwner;

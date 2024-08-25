@@ -56,7 +56,7 @@ void APuzzleActor::TriggeredActorChanged(const bool NewState)
 		CurrentlyActivated = FMath::Clamp(CurrentlyActivated + 1, 0, ActorsToActivate.Num());
 
 		UE_LOG(LogTemp, Warning, TEXT("NumNeeded %i, ArrayNum %i"), CurrentlyActivated, ActorsToActivate.Num());
-		//  Check if the total actors needed to activate has been activated then do something
+		//  Check if the total actors needed to activate has been activated then do something in Blueprint
 		if (CurrentlyActivated >= ActorsToActivate.Num())
 		{
 			BPDealWithActivatedComplete();

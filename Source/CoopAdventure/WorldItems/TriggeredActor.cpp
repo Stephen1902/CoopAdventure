@@ -9,7 +9,7 @@
 ATriggeredActor::ATriggeredActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bReplicates = true;
 	SetReplicatingMovement(true);
@@ -46,13 +46,6 @@ void ATriggeredActor::StateHasChanged(const bool NewState)
 	OnStateChanged.Broadcast(NewState);
 }
 
-// Called every frame
-void ATriggeredActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 void ATriggeredActor::DealWithActivatedChanged(const bool BoolIn)
 {
 	if (BoolIn)
@@ -60,14 +53,14 @@ void ATriggeredActor::DealWithActivatedChanged(const bool BoolIn)
 		NumberActivated += 1;
 		if (NumberActivated >= ActorsToActivate.Num())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("I'm going to do the thing now"));
 			BPDealWithActivatedChanged(true);
+			TransporterComp->ChangeInOverlappingActors(ActorsToActivate.Num(), true);
 		}
 	}
 	else
 	{
 		NumberActivated = FMath::Clamp(NumberActivated - 1, 0, ActorsToActivate.Num());
 		BPDealWithActivatedChanged(false);
+		TransporterComp->ChangeInOverlappingActors(0, false);
 	}
 }
-

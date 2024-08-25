@@ -32,28 +32,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Set Up")
 	UStaticMeshComponent* MeshComp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	class UInteractionComponent* InteractionComp;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class UTransporterComponent* TransporterComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class URotationComponent* RotationComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	class UWidgetComponent* WidgetComp;
-	
+	bool bCanBeInteractedWith;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	virtual FText LookAt_Implementation() override;
-	UFUNCTION()
-	virtual void InteractWith_Implementation(ATP_FirstPersonCharacter* CharacterWhoInteracted) override;
-
 	
-private:
-	bool bCanBeInteractedWith;
 };

@@ -9,7 +9,6 @@
 /** A base class for any actor that is only activated by another actor triggering it ie, a door that needs a code entered into it by an interactive actor */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStateChanged, bool, NewState);
 
-
 UCLASS()
 class COOPADVENTURE_API ATriggeredActor : public AActor
 {
@@ -46,9 +45,6 @@ protected:
 	void StateHasChanged(const bool NewState);
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
 	UPROPERTY(BlueprintAssignable)
 	FOnStateChanged OnStateChanged;
 private:
