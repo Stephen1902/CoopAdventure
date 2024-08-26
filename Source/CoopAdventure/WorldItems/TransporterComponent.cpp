@@ -3,7 +3,6 @@
 
 #include "TransporterComponent.h"
 #include "InteractiveActor.h"
-#include "PressurePlateActor.h"
 
 // Sets default values for this component's properties
 UTransporterComponent::UTransporterComponent()
@@ -37,15 +36,6 @@ void UTransporterComponent::BeginPlay()
 	Super::BeginPlay();
 
 	MyOwner = GetOwner();
-	
-	for (AActor* TriggerActor : TriggerActors)
-	{
-		if (APressurePlateActor* PressurePlateActor = Cast<APressurePlateActor>(TriggerActor))
-		{
-			PressurePlateActor->OnPlateActivated.AddDynamic(this, &UTransporterComponent::OnPressurePlateActivated);
-			PressurePlateActor->OnPlateDeactivated.AddDynamic(this, &UTransporterComponent::OnPressurePlateDeactivated);
-		}
-	}
 
 	if (!ReturnsToStartPoint)
 	{
@@ -114,11 +104,11 @@ void UTransporterComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 }
 
-void UTransporterComponent::ChangeInOverlappingActors(const int32 NumNeededToActivate, const bool IsIncreasing)
+void UTransporterComponent::ChangeInOverlappingActors(const int32 NumNeededToActivate, const bool HasIncreased)
 {
-	if (IsIncreasing)
+	if (HasIncreased)
 	{
-		ActivatedTriggerCount++;
+		ActivatedTriggerCount = FMath::Clamp(ActivatedTriggerCount + 1, 0, NumNeededToActivate);
 		if (ActivatedTriggerCount >= NumNeededToActivate)
 		{
 			bCanMove = true;
@@ -127,7 +117,7 @@ void UTransporterComponent::ChangeInOverlappingActors(const int32 NumNeededToAct
 	}
 	else
 	{
-		ActivatedTriggerCount--;
+		ActivatedTriggerCount = FMath::Clamp(ActivatedTriggerCount - 1, 0, NumNeededToActivate);
 		bHasBeenTriggered = false;
 	}
 }

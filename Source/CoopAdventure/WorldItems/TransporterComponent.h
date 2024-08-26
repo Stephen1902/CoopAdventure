@@ -24,33 +24,25 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetIsTriggered(const bool CanMove);
 
-	void ChangeInOverlappingActors(const int32 NumNeededToActivate, bool IsIncreasing);
+	void ChangeInOverlappingActors(const int32 NumNeededToActivate, bool HasIncreased);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	// Time in seconds to move from one point to the other
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Set Up")
 	float MoveTime;
 
-	// Actor(s) needed for the owner of this object to be triggered
-	UPROPERTY(EditAnywhere)
-	TArray<AActor*> TriggerActors;
-
-	// Whether or not the owning actor returns to StartPoint when deactivated
-	UPROPERTY(EditAnywhere)
+	// Whether the owning actor returns to StartPoint when deactivated
+	UPROPERTY(EditAnywhere, Category = "Set Up")
 	bool ReturnsToStartPoint;
 
 	// Relative point to move to when activated
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Set Up")
 	FVector PointToMoveTo;
 	
-	// Number of TriggerActors that have been triggered
-	UPROPERTY(VisibleAnywhere)
-	int32 ActivatedTriggerCount;
-
-	// Whether or not this component has been triggered
+	// Whether this component has been triggered
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	bool bHasBeenTriggered;
 public:	
@@ -71,4 +63,8 @@ private:
 
 	float SpeedPerFrame;
 	bool bCanMove;
+	
+	// Number of TriggerActors that have been triggered
+	int32 ActivatedTriggerCount;
+
 };

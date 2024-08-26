@@ -18,26 +18,28 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCanMove(const bool NewMove);
+
+	void ChangeInOverlappingActors(const int32 NumNeededToActivate, const bool HasIncreased);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable)
-	void SetTravelPoints(const FRotator RotPoint1, const FRotator RotPoint2);
-
+	
 	// Time in seconds to move from one point to the other
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Set Up")
 	float MoveTime;
 	
-	// Whether or not the owning actor returns to StartPoint when deactivated
-	UPROPERTY(EditAnywhere)
+	// Whether the owning actor returns to StartPoint when deactivated
+	UPROPERTY(EditAnywhere, Category = "Set Up")
 	bool bReturnsToStartPoint;
 
 	// How long before this item returns to it's original location
-	UPROPERTY(EditAnywhere, meta=(EditCondition="bReturnsToStartPoint"))
+	UPROPERTY(EditAnywhere, meta=(EditCondition="bReturnsToStartPoint"), Category = "Set Up")
 	float ReturnDelay;
+
+	UPROPERTY(EditAnywhere, Category = "Set Up")
+	FRotator PointToMoveTo;
 	
-	// Whether or not this component has been triggered
+	// Whether this component has been triggered
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	bool bHasBeenTriggered;
 public:	
@@ -68,4 +70,7 @@ private:
 
 	UFUNCTION()
 	void OnRep_NewRotation();
+	
+	// Number of TriggerActors that have been triggered
+	int32 ActivatedTriggerCount;
 };

@@ -2,8 +2,6 @@
 
 
 #include "RotationComponent.h"
-
-#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -41,36 +39,31 @@ void URotationComponent::SetCanMove(const bool NewMove)
 	}
 }
 
-
 // Called when the game starts
 void URotationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MyOwner = GetOwner();	
-}
+	MyOwner = GetOwner();
 
-void URotationComponent::SetTravelPoints(const FRotator RotPoint1, const FRotator RotPoint2)
-{
-	if (!RotPoint1.Equals(RotPoint2))
+	if (MyOwner && PointToMoveTo != FRotator::ZeroRotator)
 	{
-		StartRotation = RotPoint1;
-		EndRotation = RotPoint2;
-		
-		if (RotPoint1.Pitch != RotPoint2.Pitch)
+		StartRotation = GetOwner()->GetActorRotation();
+		EndRotation = GetOwner()->GetActorRotation() + PointToMoveTo;
+
+		if (StartRotation.Pitch != EndRotation.Pitch)
 		{
-			RotationPerFrame = FMath::Abs((RotPoint1.Pitch - RotPoint2.Pitch)) / MoveTime;
+			RotationPerFrame = FMath::Abs((StartRotation.Pitch - EndRotation.Pitch)) / MoveTime;
 		}
-		else if (RotPoint1.Roll != RotPoint2.Roll)
+		else if (StartRotation.Roll != EndRotation.Roll)
 		{
-			RotationPerFrame = FMath::Abs((RotPoint1.Roll - RotPoint2.Roll)) / MoveTime;
+			RotationPerFrame = FMath::Abs((StartRotation.Roll - EndRotation.Roll)) / MoveTime;
 		}
 		else
 		{
-			RotationPerFrame = FMath::Abs((RotPoint1.Yaw - RotPoint2.Yaw)) / MoveTime;
+			RotationPerFrame = FMath::Abs((StartRotation.Yaw - EndRotation.Yaw)) / MoveTime;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("RotationPerFrame set to %s"), *FString::SanitizeFloat(RotationPerFrame));
 		bArePointsSet = true;
 	}
 }
@@ -112,6 +105,25 @@ void URotationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		}
 	}
 }
+
+void URotationComponent::ChangeInOverlappingActors(const int32 NumNeededToActivate, const bool HasIncreased)
+{
+	if (HasIncreased)
+	{
+		ActivatedTriggerCount = FMath::Clamp(ActivatedTriggerCount + 1, 0, NumNeededToActivate);
+		if (ActivatedTriggerCount >= NumNeededToActivate)
+		{
+			bCanMove = true;
+			bHasBeenTriggered = true;
+		}
+	}
+	else
+	{
+		ActivatedTriggerCount = FMath::Clamp(ActivatedTriggerCount - 1, 0, NumNeededToActivate);
+		bHasBeenTriggered = false;
+	}
+}
+
 
 void URotationComponent::OnReturnTimerExpired()
 {

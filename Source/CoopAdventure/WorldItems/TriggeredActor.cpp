@@ -55,6 +55,7 @@ void ATriggeredActor::DealWithActivatedChanged(const bool BoolIn)
 		{
 			BPDealWithActivatedChanged(true);
 			TransporterComp->ChangeInOverlappingActors(ActorsToActivate.Num(), true);
+			RotationComp->ChangeInOverlappingActors(ActorsToActivate.Num(), true);
 		}
 	}
 	else
@@ -62,5 +63,6 @@ void ATriggeredActor::DealWithActivatedChanged(const bool BoolIn)
 		NumberActivated = FMath::Clamp(NumberActivated - 1, 0, ActorsToActivate.Num());
 		BPDealWithActivatedChanged(false);
 		TransporterComp->ChangeInOverlappingActors(0, false);
+		RotationComp->ChangeInOverlappingActors(0, false);
 	}
 }
