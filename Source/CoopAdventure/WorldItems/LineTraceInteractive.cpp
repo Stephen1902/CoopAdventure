@@ -4,7 +4,7 @@
 #include "TransporterComponent.h"
 #include "Components/WidgetComponent.h"
 #include "CoopAdventure/Components/InteractionComponent.h"
-#include "CoopAdventure/Components/RotationComponent.h"
+#include "CoopAdventure/Components/RotatingComponent.h"
 
 ALineTraceInteractive::ALineTraceInteractive()
 {
@@ -44,10 +44,10 @@ void ALineTraceInteractive::InteractWith_Implementation(ATP_FirstPersonCharacter
 	if (bCanBeInteractedWith)
 	{
 		TransporterComp->SetCanMove(true);
-		RotationComp->SetCanMove(true);
+		RotatingComp->ReactToActivationChange(true);
 
 		OnActivatedChange.Broadcast(true);
-	
+		
 		IInteractionInterface::InteractWith_Implementation(CharacterWhoInteracted);
 	}
 }

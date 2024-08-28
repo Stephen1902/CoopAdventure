@@ -37,7 +37,7 @@ protected:
 	class UTransporterComponent* TransporterComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	class URotationComponent* RotationComp;
+	class URotatingComponent* RotatingComp;
 
 	bool bCanBeInteractedWith;
 public:	

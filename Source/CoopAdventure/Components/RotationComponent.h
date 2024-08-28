@@ -27,16 +27,24 @@ protected:
 	// Time in seconds to move from one point to the other
 	UPROPERTY(EditAnywhere, Category = "Set Up")
 	float MoveTime;
+
+	// Whether this actor rotates a certain amount every time it is triggered
+	UPROPERTY(EditAnywhere, Category = "Set Up")
+	bool bRotatesPerTurn;
+
+	// The amount this actor rotates if it is a per turn rotation 
+	UPROPERTY(EditAnywhere, Category = "Set Up", meta=(EditCondition="bRotatesPerTurn"))
+	FRotator RotationPerTurn;
 	
 	// Whether the owning actor returns to StartPoint when deactivated
-	UPROPERTY(EditAnywhere, Category = "Set Up")
+	UPROPERTY(EditAnywhere, Category = "Set Up", meta=(EditCondition="!bRotatesPerTurn"))
 	bool bReturnsToStartPoint;
 
 	// How long before this item returns to it's original location
 	UPROPERTY(EditAnywhere, meta=(EditCondition="bReturnsToStartPoint"), Category = "Set Up")
 	float ReturnDelay;
 
-	UPROPERTY(EditAnywhere, Category = "Set Up")
+	UPROPERTY(EditAnywhere, Category = "Set Up", meta=(EditCondition="!bRotatesPerTurn"))
 	FRotator PointToMoveTo;
 	
 	// Whether this component has been triggered
@@ -73,4 +81,6 @@ private:
 	
 	// Number of TriggerActors that have been triggered
 	int32 ActivatedTriggerCount;
+	
+	FRotator LeftToRotate;
 };

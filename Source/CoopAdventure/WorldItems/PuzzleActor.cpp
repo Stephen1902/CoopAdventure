@@ -5,7 +5,7 @@
 
 #include "TransporterComponent.h"
 #include "TriggeredActor.h"
-#include "CoopAdventure/Components/RotationComponent.h"
+#include "CoopAdventure/Components/RotatingComponent.h"
 
 // Sets default values
 APuzzleActor::APuzzleActor()
@@ -23,7 +23,7 @@ APuzzleActor::APuzzleActor()
 	MeshComponent->SetupAttachment(RootComp);
 
 	TransporterComp = CreateDefaultSubobject<UTransporterComponent>("Movement Comp");
-	RotationComp = CreateDefaultSubobject<URotationComponent>("Rotation Comp");
+	RotatingComp = CreateDefaultSubobject<URotatingComponent>("Rotating Comp");
 	
 	CurrentlyActivated = 0;
 }
@@ -59,12 +59,19 @@ void APuzzleActor::TriggeredActorChanged(const bool NewState)
 		//  Check if the total actors needed to activate has been activated then do something in Blueprint
 		if (CurrentlyActivated >= ActorsToActivate.Num())
 		{
+			TransporterComp->ChangeInOverlappingActors(ActorsToActivate.Num(), true);
+			RotatingComp->ReactToActivationChange(true);
 			BPDealWithActivatedComplete();
 		}
 	}
 	else
 	{
 		CurrentlyActivated = FMath::Clamp(CurrentlyActivated - 1, 0, ActorsToActivate.Num());
+		TransporterComp->ChangeInOverlappingActors(ActorsToActivate.Num(), false);
+		RotatingComp->ReactToActivationChange(false);
 	}
+
+	
+	
 }
 

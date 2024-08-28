@@ -3,7 +3,7 @@
 #include "TriggeredActor.h"
 #include "InteractiveActor.h"
 #include "TransporterComponent.h"
-#include "CoopAdventure/Components/RotationComponent.h"
+#include "CoopAdventure/Components/RotatingComponent.h"
 
 // Sets default values
 ATriggeredActor::ATriggeredActor()
@@ -21,7 +21,7 @@ ATriggeredActor::ATriggeredActor()
 	MeshComponent->SetupAttachment(RootComp);
 
 	TransporterComp = CreateDefaultSubobject<UTransporterComponent>("Movement Comp");
-	RotationComp = CreateDefaultSubobject<URotationComponent>("Rotation Comp");
+	RotatingComp = CreateDefaultSubobject<URotatingComponent>("Rotating Comp");
 }
 
 // Called when the game starts or when spawned
@@ -55,7 +55,7 @@ void ATriggeredActor::DealWithActivatedChanged(const bool BoolIn)
 		{
 			BPDealWithActivatedChanged(true);
 			TransporterComp->ChangeInOverlappingActors(ActorsToActivate.Num(), true);
-			RotationComp->ChangeInOverlappingActors(ActorsToActivate.Num(), true);
+			RotatingComp->ReactToActivationChange(true);
 		}
 	}
 	else
@@ -63,6 +63,6 @@ void ATriggeredActor::DealWithActivatedChanged(const bool BoolIn)
 		NumberActivated = FMath::Clamp(NumberActivated - 1, 0, ActorsToActivate.Num());
 		BPDealWithActivatedChanged(false);
 		TransporterComp->ChangeInOverlappingActors(0, false);
-		RotationComp->ChangeInOverlappingActors(0, false);
+		RotatingComp->ReactToActivationChange(false);
 	}
 }

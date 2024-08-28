@@ -2,7 +2,7 @@
 
 #include "InteractiveActor.h"
 #include "TransporterComponent.h"
-#include "CoopAdventure/Components/RotationComponent.h"
+#include "CoopAdventure/Components/RotatingComponent.h"
 
 #define TRACE_INTERACTIVE ECC_GameTraceChannel1
 
@@ -24,7 +24,7 @@ AInteractiveActor::AInteractiveActor()
 	MeshComp->SetCollisionResponseToChannel(TRACE_INTERACTIVE, ECR_Block);  // Block line traces looking for the interactive channel
 
 	TransporterComp = CreateDefaultSubobject<UTransporterComponent>("Transporter Comp");
-	RotationComp = CreateDefaultSubobject<URotationComponent>("Rotation Comp");
+	RotatingComp = CreateDefaultSubobject<URotatingComponent>("Rotating Comp");
 
 	bCanBeInteractedWith = true;
 }

@@ -46,25 +46,47 @@ void URotationComponent::BeginPlay()
 
 	MyOwner = GetOwner();
 
-	if (MyOwner && PointToMoveTo != FRotator::ZeroRotator)
+	if (MyOwner)
 	{
-		StartRotation = GetOwner()->GetActorRotation();
-		EndRotation = GetOwner()->GetActorRotation() + PointToMoveTo;
+		if (bRotatesPerTurn)
+		{
+			bArePointsSet = true;
+			bReturnsToStartPoint = false;
+			bCanMove = false;
 
-		if (StartRotation.Pitch != EndRotation.Pitch)
-		{
-			RotationPerFrame = FMath::Abs((StartRotation.Pitch - EndRotation.Pitch)) / MoveTime;
+			if (RotationPerTurn.Pitch != 0.f)
+			{
+				RotationPerFrame = FMath::Abs((MyOwner->GetActorRotation().Pitch - RotationPerTurn.Pitch)) / MoveTime;
+			}
+			else if (RotationPerTurn.Roll != 0.f)
+			{
+				RotationPerFrame = FMath::Abs((MyOwner->GetActorRotation().Roll - RotationPerTurn.Roll)) / MoveTime;
+			}
+			else
+			{
+				RotationPerFrame = FMath::Abs((MyOwner->GetActorRotation().Yaw - RotationPerTurn.Yaw)) / MoveTime;
+			}
 		}
-		else if (StartRotation.Roll != EndRotation.Roll)
+		else if (PointToMoveTo != FRotator::ZeroRotator)
 		{
-			RotationPerFrame = FMath::Abs((StartRotation.Roll - EndRotation.Roll)) / MoveTime;
-		}
-		else
-		{
-			RotationPerFrame = FMath::Abs((StartRotation.Yaw - EndRotation.Yaw)) / MoveTime;
-		}
+			StartRotation = GetOwner()->GetActorRotation();
+			EndRotation = GetOwner()->GetActorRotation() + PointToMoveTo;
 
-		bArePointsSet = true;
+			if (StartRotation.Pitch != EndRotation.Pitch)
+			{
+				RotationPerFrame = FMath::Abs((StartRotation.Pitch - EndRotation.Pitch)) / MoveTime;
+			}
+			else if (StartRotation.Roll != EndRotation.Roll)
+			{
+				RotationPerFrame = FMath::Abs((StartRotation.Roll - EndRotation.Roll)) / MoveTime;
+			}
+			else
+			{
+				RotationPerFrame = FMath::Abs((StartRotation.Yaw - EndRotation.Yaw)) / MoveTime;
+			}
+
+			bArePointsSet = true;
+		}
 	}
 }
 
@@ -77,29 +99,45 @@ void URotationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	{
 		if (MyOwner && MyOwner->HasAuthority() && bArePointsSet)
 		{
-			FRotator CurrentRotation = MyOwner->GetActorRotation();
-			FRotator TargetRotation = bHasBeenTriggered ? EndRotation : StartRotation;
-			if (!CurrentRotation.Equals(TargetRotation))
+			
+			if (bRotatesPerTurn)
 			{
+			/*	FQuat QuatRotation = FQuat(RotationPerTurn * DeltaTime);
+				GetOwner()->AddActorLocalRotation(QuatRotation);
+
+				if (fmod(MyOwner->GetActorRotation().Pitch, RotationPerTurn.Pitch) == 0 &&  fmod(MyOwner->GetActorRotation().Roll, RotationPerTurn.Roll) == 0 && fmod(MyOwner->GetActorRotation().Yaw, RotationPerTurn.Yaw) == 0)
+				{
+					bCanMove = false;
+				}
+				*/
+			} 
+			else
+			{
+				FRotator CurrentRotation = MyOwner->GetActorRotation();
+				FRotator TargetRotation = bHasBeenTriggered ? EndRotation : StartRotation;
 				NewOwnerRotation = FMath::RInterpConstantTo(CurrentRotation, TargetRotation, DeltaTime, RotationPerFrame);
 				OnRep_NewRotation();
-				
+
 				if (NewOwnerRotation == EndRotation && !bReturnsToStartPoint)
 				{
 					bCanMove = false;
 				}
-			}
-			else
-			{
-				bRotationInProgress = false;
-				if (bHasBeenTriggered)
+				else
 				{
-					if (bReturnsToStartPoint && !GetWorld()->GetTimerManager().IsTimerActive(ReturnToStartTimer))
+					bRotationInProgress = false;
+					if (bHasBeenTriggered)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("Target is at end point"));
-
-						GetWorld()->GetTimerManager().SetTimer(ReturnToStartTimer, this, &URotationComponent::OnReturnTimerExpired, ReturnDelay, false);
+						if (bReturnsToStartPoint && !GetWorld()->GetTimerManager().IsTimerActive(ReturnToStartTimer))
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Target is at end point"));
+							GetWorld()->GetTimerManager().SetTimer(ReturnToStartTimer, this, &URotationComponent::OnReturnTimerExpired, ReturnDelay, false);
+						}
 					}
+				}
+
+				if (NewOwnerRotation == TargetRotation)
+				{
+					SetCanMove(false);
 				}
 			}
 		}
@@ -113,6 +151,10 @@ void URotationComponent::ChangeInOverlappingActors(const int32 NumNeededToActiva
 		ActivatedTriggerCount = FMath::Clamp(ActivatedTriggerCount + 1, 0, NumNeededToActivate);
 		if (ActivatedTriggerCount >= NumNeededToActivate)
 		{
+			if (GetOwner() && bRotatesPerTurn)
+			{
+				LeftToRotate = GetOwner()->GetActorRotation() + RotationPerTurn;				
+			}
 			bCanMove = true;
 			bHasBeenTriggered = true;
 		}
@@ -120,6 +162,10 @@ void URotationComponent::ChangeInOverlappingActors(const int32 NumNeededToActiva
 	else
 	{
 		ActivatedTriggerCount = FMath::Clamp(ActivatedTriggerCount - 1, 0, NumNeededToActivate);
+		if (bRotatesPerTurn)
+		{
+			bCanMove = false;
+		}
 		bHasBeenTriggered = false;
 	}
 }

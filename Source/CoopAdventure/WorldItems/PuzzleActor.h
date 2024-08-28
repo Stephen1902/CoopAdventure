@@ -33,7 +33,7 @@ protected:
 	TObjectPtr<class UTransporterComponent> TransporterComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<class URotationComponent> RotationComp;
+	TObjectPtr<class URotatingComponent> RotatingComp;
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Triggered|Triggered Events")
 	void BPDealWithActivatedComplete();
