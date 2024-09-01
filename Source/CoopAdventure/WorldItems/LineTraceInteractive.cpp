@@ -2,16 +2,12 @@
 
 #include "LineTraceInteractive.h"
 #include "TransporterComponent.h"
-#include "Components/WidgetComponent.h"
 #include "CoopAdventure/Components/InteractionComponent.h"
 #include "CoopAdventure/Components/RotatingComponent.h"
 
 ALineTraceInteractive::ALineTraceInteractive()
 {
 	InteractionComp = CreateDefaultSubobject<UInteractionComponent>("Interaction Comp");
-
-	WidgetComp = CreateDefaultSubobject<UWidgetComponent>("Widget Comp");
-	WidgetComp->SetVisibility(false);
 }
 
 FText ALineTraceInteractive::LookAt_Implementation()
@@ -25,13 +21,6 @@ FText ALineTraceInteractive::LookAt_Implementation()
 				return InteractionComp->GetTextToDisplay();
 			}
 		}
-		
-
-		/*	if (WidgetComp)
-			{
-				WidgetComp->SetVisibility(true);
-			}
-			*/
 	}
 	
 	return FText::FromString("");

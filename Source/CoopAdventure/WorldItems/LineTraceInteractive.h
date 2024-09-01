@@ -24,7 +24,4 @@ protected:
 
 	UFUNCTION()
 	virtual void InteractWith_Implementation(ATP_FirstPersonCharacter* CharacterWhoInteracted) override;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	class UWidgetComponent* WidgetComp;
 };
