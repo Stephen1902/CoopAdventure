@@ -20,16 +20,27 @@ public:
 	void ReactToActivationChange(const bool NewState);
 	
 protected:
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+	
 	virtual void BeginPlay() override;
 
 	//  Amount of time the owner of this component moves for when active
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Variables")
 	float MovementTime;
 
-	// Time delay before returning the owner of this component to it's original position.  0 if never returns
+	// Whether the owning actor should return to it's start point when deactivated ie when a player steps off a trigger
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Variables")
+	bool bReturnsWhenDeactivated;
+
+	// Time delay before returning the owner of this component to it's original position.  0 if never returns.  Only available if doesn't automatically return when deactivated.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Variables", meta=(EditCondition="!bReturnsWhenDeactivated"))
 	float ReturnDelay;
+
 private:
+	FRotator StartingRotation;
+	
 	UFUNCTION()
 	void OnActivated(UActorComponent* Component, bool Reset);
 
@@ -38,6 +49,7 @@ private:
 
 	FTimerHandle RotationStopTimer;
 	FTimerHandle RotationReturnTimer;
+	FTimerHandle DeactivationCheckTimer;
 
 	UFUNCTION()
 	void RotationTimerHasExpired();
@@ -45,5 +57,10 @@ private:
 	UFUNCTION()
 	void ReturnTimerHasExpired();
 
+	UFUNCTION()
+	void DeactivatedCheckTimer();
+
 	bool bCanReturn;
+
+	bool bIsDeactivated;
 };

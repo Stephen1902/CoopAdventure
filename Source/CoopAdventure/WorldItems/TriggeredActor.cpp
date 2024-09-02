@@ -29,14 +29,11 @@ void ATriggeredActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ActorsToActivate.Num() > 0)
+	if (HasAuthority() && ActorsToActivate.Num() > 0)	
 	{
-		if (HasAuthority())
+		for (auto& It : ActorsToActivate)
 		{
-			for (auto& It : ActorsToActivate)
-			{
-				It->OnActivatedChange.AddDynamic(this, &ATriggeredActor::DealWithActivatedChanged);
-			}
+			It->OnActivatedChange.AddDynamic(this, &ATriggeredActor::DealWithActivatedChanged);
 		}
 	}
 }
