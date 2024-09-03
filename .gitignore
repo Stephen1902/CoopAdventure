@@ -8,14 +8,12 @@
 /modules.xml
 Content/Characters/
 Content/LevelPrototyping/
-Content/ThirdPerson/Input/
 Content/__ExternalActors__/
 Content/__ExternalObjects__/
 Content/MSPresets/
 Content/Megascans/
 Content/Metahumans/
-Content/ThirdPerson/Maps/_GENERATED/nicho/
-Content/Openable_Scifi_containers/
+
 
 # Visual Studio 2015 user specific files
 .vs/
@@ -108,4 +106,6 @@ Content/ToolShedVOL1/*
 Content/Zombie/*
 /Plugins/Developer/RiderLink/*
 Content/Food_Pack_01/*
-
+Content/ThirdPerson/Maps/_GENERATED/nicho/
+Content/Openable_Scifi_containers/
+Content/MedievalDungeon/

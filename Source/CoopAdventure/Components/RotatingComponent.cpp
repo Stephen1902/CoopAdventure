@@ -27,7 +27,6 @@ void URotatingComponent::ReactToActivationChange(const bool NewState)
 			RotationRate = StartingRotation * -1.f;
 			GetWorld()->GetTimerManager().SetTimer(RotationStopTimer, this, &URotatingComponent::RotationTimerHasExpired, TimeElapsed, false);
 		}
-		UE_LOG(LogTemp, Warning, TEXT("bCanReturn set to %s"), bCanReturn ? TEXT("true.") : TEXT("false."));
 	}
 	
 	if (!GetWorld()->GetTimerManager().IsTimerActive(RotationStopTimer) && !GetWorld()->GetTimerManager().IsTimerActive(RotationReturnTimer))
@@ -110,12 +109,10 @@ void URotatingComponent::DeactivatedCheckTimer()
 {
 	if (!bCanReturn)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("DeactivatedCheckTimer"));
 		if (RotationRate != StartingRotation * -1.f)
 		{
 			RotationRate = StartingRotation * -1.f;
 			SetActive(true);
-			UE_LOG(LogTemp, Warning, TEXT("Starting Rotation set to %f, %f, %f"), RotationRate.Roll, RotationRate.Pitch, RotationRate.Yaw);
 		}
 	}
 }
