@@ -49,5 +49,5 @@ void AInteractiveActor::Tick(float DeltaTime)
 
 void AInteractiveActor::SetCanBeInteractedWith(const bool InteractionState)
 {
-	bCanBeInteractedWith = InteractionState;
+	//bCanBeInteractedWith = InteractionState;
 }

@@ -24,4 +24,10 @@ protected:
 
 	UFUNCTION()
 	virtual void InteractWith_Implementation(ATP_FirstPersonCharacter* CharacterWhoInteracted) override;
+
+private:
+	FTimerHandle CanBeInteractedTimer;
+
+	UFUNCTION()
+	void MovementTimerExpired();
 };

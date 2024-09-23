@@ -18,7 +18,8 @@ class COOPADVENTURE_API URotatingComponent : public URotatingMovementComponent
 public:
 	UFUNCTION(BlueprintCallable)
 	void ReactToActivationChange(const bool NewState);
-	
+
+	float GetMovementTime() const { return MovementTime; }
 protected:
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

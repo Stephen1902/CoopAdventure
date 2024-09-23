@@ -26,6 +26,8 @@ public:
 
 	void ChangeInOverlappingActors(const int32 NumNeededToActivate, bool HasIncreased);
 
+	float GetMovementTime() const { return MoveTime; }
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

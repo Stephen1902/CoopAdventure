@@ -36,7 +36,19 @@ void ALineTraceInteractive::InteractWith_Implementation(ATP_FirstPersonCharacter
 		RotatingComp->ReactToActivationChange(true);
 
 		OnActivatedChange.Broadcast(true);
+
+		bCanBeInteractedWith = false;
+		float TimerTime = TransporterComp->GetMovementTime() > RotatingComp->GetMovementTime() ? TransporterComp->GetMovementTime() * 2.f : RotatingComp->GetMovementTime() * 2.0f;
+
+		// Set a timer before the actor can be interacted with again, with a small margin.
+		GetWorld()->GetTimerManager().SetTimer(CanBeInteractedTimer, this, &ALineTraceInteractive::MovementTimerExpired, TimerTime + 0.05f, false);		
 		
 		IInteractionInterface::InteractWith_Implementation(CharacterWhoInteracted);
 	}
+}
+
+void ALineTraceInteractive::MovementTimerExpired()
+{
+	GetWorld()->GetTimerManager().ClearTimer(CanBeInteractedTimer);
+	bCanBeInteractedWith = true;
 }
